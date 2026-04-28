@@ -28,6 +28,21 @@ deny contains result if {
 	result := metadata.result_helper(rego.metadata.chain(), [err])
 }
 
+# METADATA
+# title: Rule data provided
+# description: >-
+#   Confirm the expected `required_task_results` rule data key has been provided in the expected
+#   format.
+# custom:
+#   short_name: rule_data_provided
+#   failure_msg: '%s'
+#   solution: If provided, ensure the rule data is in the expected format.
+#
+deny contains result if {
+	some e in _rule_data_errors
+	result := metadata.result_helper_with_severity(rego.metadata.chain(), [e.message], e.severity)
+}
+
 _errors(task) := {err |
 	version := object.get(task.metadata, ["labels", "app.kubernetes.io/version"], "")
 	version_constraints := {r.version | some r in rule_data.get(_rule_data_key)}
@@ -57,21 +72,6 @@ _errors(task) := {err |
 	]
 	count(found) == 0
 	err := sprintf("%q result not found in %q Task/v%s", [required.result, required.task, version])
-}
-
-# METADATA
-# title: Rule data provided
-# description: >-
-#   Confirm the expected `required_task_results` rule data key has been provided in the expected
-#   format.
-# custom:
-#   short_name: rule_data_provided
-#   failure_msg: '%s'
-#   solution: If provided, ensure the rule data is in the expected format.
-#
-deny contains result if {
-	some e in _rule_data_errors
-	result := metadata.result_helper_with_severity(rego.metadata.chain(), [e.message], e.severity)
 }
 
 _rule_data_errors contains error if {
