@@ -6,7 +6,7 @@ import rego.v1
 #   - Direct task YAML input (ec validate input)
 #   - Task bundle OCI image layers (ec validate image)
 tasks contains input if {
-	not input.image.ref
+	input.apiVersion
 }
 
 tasks contains task if {
